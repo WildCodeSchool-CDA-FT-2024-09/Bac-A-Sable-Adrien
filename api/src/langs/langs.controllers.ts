@@ -2,6 +2,7 @@ import express, { Response, Request } from "express";
 import langs from "../../data/langs.json";
 import type { Lang } from "./lang.type";
 
+const validateLang = require("./lang.middlewares");
 const langControllers = express.Router();
 
 langControllers.get("/", (_: any, res: Response) => {
@@ -16,6 +17,11 @@ langControllers.get("/:id", (req: Request, res: Response) => {
   } else {
     res.sendStatus(404);
   }
+});
+
+langControllers.post("/", validateLang, (req: Request, res: Response) => {
+  langs.push(req.body);
+  res.status(201).json(req.body);
 });
 
 export default langControllers;

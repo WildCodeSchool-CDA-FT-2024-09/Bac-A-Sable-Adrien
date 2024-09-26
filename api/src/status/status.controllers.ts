@@ -2,6 +2,7 @@ import express, { Response, Request } from "express";
 import status from "../../data/status.json";
 import type { Statu } from "./statu.type";
 
+const validateStatu = require("./statu.middlewares");
 const statuControllers = express.Router();
 
 statuControllers.get("/", (_: any, res: Response) => {
@@ -16,6 +17,11 @@ statuControllers.get("/:id", (req: Request, res: Response) => {
   } else {
     res.sendStatus(404);
   }
+});
+
+statuControllers.post("/", validateStatu, (req: Request, res: Response) => {
+  status.push(req.body);
+  res.status(201).json(req.body);
 });
 
 export default statuControllers;

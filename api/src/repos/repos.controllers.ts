@@ -1,7 +1,9 @@
 import express, { Response, Request } from "express";
+
 import repos from "../../data/repos.json";
 import type { Repo } from "./repo.type";
 
+const validateRepo = require("./repo.middlewares");
 const repoControllers = express.Router();
 
 repoControllers.get("/", (_: any, res: Response) => {
@@ -16,6 +18,11 @@ repoControllers.get("/:id", (req: Request, res: Response) => {
   } else {
     res.sendStatus(404);
   }
+});
+
+repoControllers.post("/", validateRepo, (req: Request, res: Response) => {
+  repos.push(req.body);
+  res.status(201).json(req.body);
 });
 
 export default repoControllers;
