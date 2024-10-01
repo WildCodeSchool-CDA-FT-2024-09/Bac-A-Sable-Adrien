@@ -1,44 +1,83 @@
 import express, { Response, Request } from "express";
-
-import repos from "../../data/repos.json";
-import type { Repo } from "./repo.type";
-
-const validateRepo = require("./repo.middlewares");
-let myRepos: Array<Repo> = repos;
+import { Repo } from "../entities/repos";
+import { validate } from "class-validator";
 
 const repoControllers = express.Router();
 
-repoControllers.get("/", (_: any, res: Response) => {
-  res.status(200).json(myRepos);
-});
-
-repoControllers.get("/:id", (req: Request, res: Response) => {
-  const repo = myRepos.find((rep) => rep.id === req.params.id) as Repo;
-
-  if (repo) {
+repoControllers.get("/", async (_: any, res: Response) => {
+  try {
+    const repo = await Repo.find();
     res.status(200).json(repo);
-  } else {
-    res.sendStatus(404);
+  } catch (error) {
+    res.sendStatus(500);
   }
 });
 
-repoControllers.post("/", validateRepo, (req: Request, res: Response) => {
-  myRepos.push(req.body);
-  res.status(201).json(req.body);
+repoControllers.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const repo = await Repo.findOneBy({ id: req.params.id });
+
+    if (repo) {
+      res.status(200).json(repo);
+    } else {
+      res.status(404).json({ message: "Repo not found" });
+    }
+  } catch (error) {
+    res.sendStatus(500);
+  }
 });
 
-repoControllers.put("/:id", validateRepo, (req: Request, res: Response) => {
-  const updatedRepos = myRepos.map((repo: Repo) =>
-    repo.id === req.params.id ? { ...repo, ...req.body } : repo
-  );
+repoControllers.post("/", async (req: Request, res: Response) => {
+  try {
+    const ad = new Repo();
+    ad.id = req.body.id;
+    ad.isPrivate = req.body.isPrivate;
+    ad.name = req.body.name;
+    ad.url = req.body.url;
+    const error = await validate(ad);
+    if (error.length > 0) {
+      res.status(422).json(error);
+    } else {
+      await ad.save();
 
-  myRepos = updatedRepos;
-  res.status(200).json(req.body);
+      res.send(ad);
+    }
+  } catch (error) {
+    res.sendStatus(500);
+  }
 });
 
-repoControllers.delete("/:id", (req: Request, res: Response) => {
-  myRepos = myRepos.filter((repo: Repo) => repo.id !== req.params.id);
-  res.sendStatus(204);
+repoControllers.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const repoUpdate = await Repo.findOneBy({ id: req.params.id });
+
+    if (repoUpdate) {
+      const updatedRepo = { ...repoUpdate, ...req.body };
+      await Repo.save(updatedRepo);
+      res.status(200).json(updatedRepo);
+    } else {
+      res.status(404).json({ message: "Repo not found" });
+    }
+  } catch (error) {
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+});
+
+repoControllers.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const repoDelete = await Repo.findOneBy({ id: req.params.id });
+
+    if (repoDelete) {
+      await Repo.remove(repoDelete);
+      res.sendStatus(204);
+    } else {
+      res.sendStatus(404);
+    }
+  } catch (error) {
+    res.sendStatus(500);
+  }
 });
 
 export default repoControllers;

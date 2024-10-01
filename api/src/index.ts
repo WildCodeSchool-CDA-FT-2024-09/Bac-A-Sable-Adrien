@@ -1,6 +1,8 @@
 import express from "express";
 import router from "./router";
 import dotenv from "dotenv";
+import "reflect-metadata";
+import { dataSource } from "./config/db";
 
 dotenv.config();
 
@@ -17,6 +19,7 @@ if (!port) {
 
 console.log(`Port utilisé: ${port}`);
 
-app.listen(parseInt(port), () => {
+app.listen(parseInt(port), async () => {
+  await dataSource.initialize();
   console.log(`Serveur is listening on http://localhost:${port}`);
 });
