@@ -1,12 +1,22 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { IsString } from "class-validator";
+import { Repo } from "./repos";
 
 @Entity()
 export class Statu extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   @IsString()
   label: string;
+
+  @OneToMany(() => Repo, (repo) => repo.isPrivate)
+  repos?: Repo[];
 }

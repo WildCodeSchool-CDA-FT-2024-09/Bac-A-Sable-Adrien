@@ -6,7 +6,11 @@ const statuControllers = express.Router();
 
 statuControllers.get("/", async (_: any, res: Response) => {
   try {
-    const statu = await Statu.find();
+    const statu = await Statu.find({
+      relations: {
+        repos: true,
+      },
+    });
     res.status(200).json(statu);
   } catch (error) {
     res.sendStatus(500);
@@ -29,7 +33,7 @@ statuControllers.get("/:id", async (req: Request, res: Response) => {
 statuControllers.post("/", async (req: Request, res: Response) => {
   try {
     const ad = new Statu();
-    ad.id = req.body.id;
+
     ad.label = req.body.label;
     const error = await validate(ad);
     if (error.length > 0) {

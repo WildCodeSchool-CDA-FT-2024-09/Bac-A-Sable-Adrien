@@ -1,5 +1,15 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryColumn,
+} from "typeorm";
 import { Min, Max, IsString } from "class-validator";
+import { Statu } from "./status";
+import { Lang } from "./langs";
 
 @Entity()
 export class Repo extends BaseEntity {
@@ -7,10 +17,10 @@ export class Repo extends BaseEntity {
   @IsString()
   id: string;
 
-  @Column()
+  @ManyToOne(() => Statu, (statu) => statu.id)
   @Min(1)
-  @Max(2)
-  isPrivate: number;
+  @Max(3)
+  isPrivate: Statu;
 
   @Column()
   @IsString()
@@ -19,4 +29,8 @@ export class Repo extends BaseEntity {
   @Column()
   @IsString()
   url: string;
+
+  @ManyToMany(() => Lang, (lang) => lang.repos)
+  @JoinTable()
+  langs: Lang[];
 }
