@@ -1,0 +1,9 @@
+import { Langs } from "./langsType";
+
+export type Repo = {
+  id: string;
+  name: string;
+  url: string;
+  isPrivate: number;
+  langs: Langs[];
+};

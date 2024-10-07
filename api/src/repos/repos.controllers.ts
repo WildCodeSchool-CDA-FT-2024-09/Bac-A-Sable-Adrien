@@ -21,6 +21,31 @@ repoControllers.get("/", async (_: any, res: Response) => {
   }
 });
 
+repoControllers.get("/lang/:lang", async (req: Request, res: Response) => {
+  try {
+    const lang = req.params.lang;
+
+    const repos = await Repo.find({
+      where: {
+        langs: {
+          label: lang,
+        },
+      },
+      relations: { langs: true },
+    });
+
+    if (repos.length > 0) {
+      res.status(200).json(repos);
+    } else {
+      res
+        .status(404)
+        .json({ message: "No repositories found for this language" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
 repoControllers.get("/:id", async (req: Request, res: Response) => {
   try {
     const repo = await Repo.findOne({

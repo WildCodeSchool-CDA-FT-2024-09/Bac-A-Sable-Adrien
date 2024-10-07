@@ -2,11 +2,21 @@ import express from "express";
 import router from "./router";
 import dotenv from "dotenv";
 import "reflect-metadata";
+import cors from "cors";
+
 import { dataSource } from "./config/db";
 
 dotenv.config();
 
 const app = express();
+
+app.use(
+  cors({
+    // origin: "*",
+    origin: process.env.VITE_FRONT_URL as string,
+  })
+);
+
 app.use(express.json());
 
 app.use("/api", router);
