@@ -10,6 +10,9 @@ import { Repo } from "../src/entities/repos";
 import repos from "./repos.json";
 import lang_by_repo from "./lang_by_repo.json";
 
+import { Comment } from "../src/entities/comment";
+import comments from "./comment.json";
+
 (async () => {
   await dataSource.initialize();
   const queryRunner = dataSource.createQueryRunner();
@@ -20,9 +23,10 @@ import lang_by_repo from "./lang_by_repo.json";
     await queryRunner.query("DELETE FROM lang");
     await queryRunner.query("DELETE FROM repo");
     await queryRunner.query("DELETE FROM statu");
+    await queryRunner.query("DELETE FROM comment");
 
     await queryRunner.query(
-      'DELETE FROM sqlite_sequence WHERE name="statu" OR name="lang"'
+      'DELETE FROM sqlite_sequence WHERE name="statu" OR name="lang" OR name="comment"'
     );
 
     const savedlangs = await Promise.all(
@@ -44,8 +48,18 @@ import lang_by_repo from "./lang_by_repo.json";
         return await status.save();
       })
     );
-
     console.log(savedStatus);
+    const savedComments = await Promise.all(
+      comments.map(async (el) => {
+        const comments = new Comment();
+        comments.comment = el.comment;
+        comments.repos_id = el.repos_id;
+
+        return await comments.save();
+      })
+    );
+
+    console.log(savedComments);
 
     const savedRepos = await Promise.all(
       repos.map(async (el) => {
