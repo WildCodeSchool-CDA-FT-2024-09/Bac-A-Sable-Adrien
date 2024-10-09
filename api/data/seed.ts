@@ -21,9 +21,9 @@ import comments from "./comment.json";
     await queryRunner.startTransaction();
     await queryRunner.query("DELETE FROM repo_langs_lang");
     await queryRunner.query("DELETE FROM lang");
+    await queryRunner.query("DELETE FROM comment");
     await queryRunner.query("DELETE FROM repo");
     await queryRunner.query("DELETE FROM statu");
-    await queryRunner.query("DELETE FROM comment");
 
     await queryRunner.query(
       'DELETE FROM sqlite_sequence WHERE name="statu" OR name="lang" OR name="comment"'
@@ -38,7 +38,7 @@ import comments from "./comment.json";
       })
     );
 
-    // console.log(savedlangs);
+    console.log(savedlangs);
 
     const savedStatus = await Promise.all(
       status.map(async (el) => {
@@ -48,18 +48,9 @@ import comments from "./comment.json";
         return await status.save();
       })
     );
-    console.log(savedStatus);
-    const savedComments = await Promise.all(
-      comments.map(async (el) => {
-        const comments = new Comment();
-        comments.comment = el.comment;
-        comments.repos_id = el.repos_id;
+    //console.log(savedStatus);
 
-        return await comments.save();
-      })
-    );
-
-    console.log(savedComments);
+    //console.log(savedComments);
 
     const savedRepos = await Promise.all(
       repos.map(async (el) => {
@@ -71,14 +62,14 @@ import comments from "./comment.json";
         const status = savedStatus.find(
           (st) => st.id === el.isPrivate
         ) as Statu;
-        repo.isPrivate = status;
+        repo.status = status;
 
         const mylangs = savedlangs.filter((svLg) => {
-          //   console.log("repoID", el.id);
+          // console.log("repoID", el.id);
           const associatedlang = lang_by_repo.filter(
             (lgbyrep) => lgbyrep.repo_id === el.id
           );
-          //   console.log("A", associatedlang);
+          // console.log("A", associatedlang);
           const langLabel = langs.filter((lg) =>
             associatedlang.some((assolg) => assolg.lang_id === lg.id)
           );
@@ -87,6 +78,15 @@ import comments from "./comment.json";
         repo.langs = mylangs;
 
         return await repo.save();
+      })
+    );
+    await Promise.all(
+      comments.map(async (el) => {
+        const comments = new Comment();
+        comments.comment = el.comment;
+        comments.repos_id = el.repos_id;
+
+        return await comments.save();
       })
     );
 

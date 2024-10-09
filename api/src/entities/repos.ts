@@ -2,40 +2,60 @@ import {
   BaseEntity,
   Column,
   Entity,
-  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
 } from "typeorm";
-import { Min, Max, IsString } from "class-validator";
+
 import { Statu } from "./status";
 import { Lang } from "./langs";
 import { Comment } from "./comment";
+import { Field, ID, ObjectType } from "type-graphql";
+import { IsString } from "class-validator";
 
+@ObjectType()
 @Entity()
 export class Repo extends BaseEntity {
+  @Field(() => ID)
   @PrimaryColumn()
   @IsString()
   id: string;
 
-  @ManyToOne(() => Statu, (statu) => statu.id)
-  @Min(1)
-  @Max(3)
-  isPrivate: Statu;
-
+  @Field()
   @Column()
   @IsString()
   name: string;
 
+  @Field()
   @Column()
   @IsString()
   url: string;
 
-  @ManyToMany(() => Lang, (lang) => lang.repos)
-  @JoinTable()
-  langs: Lang[];
+  @Field(() => Statu)
+  @ManyToOne(() => Statu, (status) => status.id)
+  status: Statu;
 
-  @OneToMany(() => Comment, (comment) => comment.repos_id)
+  @Field(() => [Lang])
+  @ManyToMany(() => Lang, (lang) => lang.repos)
+  langs?: Lang[];
+
+  @Field(() => [Comment], { nullable: true })
+  @OneToMany(() => Comment, (comment) => comment.repos)
   comments?: Comment[];
+}
+
+@ObjectType()
+export class LightRepo extends BaseEntity {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  name: string;
+
+  @Field()
+  url: string;
+
+  @Field()
+  isFavorite: boolean;
 }

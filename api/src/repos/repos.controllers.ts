@@ -11,7 +11,7 @@ repoControllers.get("/", async (_: any, res: Response) => {
   try {
     const repo = await Repo.find({
       relations: {
-        isPrivate: true,
+        status: true,
         langs: true,
       },
     });
@@ -72,10 +72,10 @@ repoControllers.post("/", async (req: Request, res: Response) => {
     ad.url = req.body.url;
 
     const status = await Statu.findOneOrFail({
-      where: { id: req.body.isPrivate },
+      where: { id: req.body.status },
     });
 
-    ad.isPrivate = status;
+    ad.status = status;
 
     const langs = await Lang.find({
       where: { id: In(req.body.langs.map((l: number) => l)) },

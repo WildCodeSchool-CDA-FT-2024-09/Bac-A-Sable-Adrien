@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {
   BaseEntity,
   Column,
@@ -5,18 +6,20 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { IsString } from "class-validator";
-import { Repo } from "./repos";
+import { Repo } from "../entities/repos";
+import { Field, ObjectType } from "type-graphql";
 
+@ObjectType()
 @Entity()
 export class Statu extends BaseEntity {
+  @Field()
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Field()
   @Column()
-  @IsString()
   label: string;
 
-  @OneToMany(() => Repo, (repo) => repo.isPrivate)
+  @OneToMany(() => Repo, (repo) => repo.status)
   repos?: Repo[];
 }
