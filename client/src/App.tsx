@@ -3,34 +3,12 @@ import CardRepo from "./component/CardRepo";
 import { Repo } from "./types/reposType";
 import { Langs } from "./types/langsType";
 import Navbare from "./component/Navbare";
-import { useQuery, gql } from "@apollo/client";
+import { useGetOneReposQuery } from "./generated/graphql-types";
 import { useState } from "react";
-
-const GET_REPOS = gql`
-  query {
-    fullrepos {
-      langs {
-        id
-        label
-      }
-      name
-      status {
-        label
-        id
-      }
-      url
-      id
-    }
-    fulllangs {
-      id
-      label
-    }
-  }
-`;
 
 function App() {
   const [selectedLang, setSelectedLang] = useState<string | null>(null);
-  const { loading, error, data, refetch } = useQuery(GET_REPOS);
+  const { loading, error, data, refetch } = useGetOneReposQuery();
 
   if (loading) return <h1>Loading ...</h1>;
   if (error) return <p>Error</p>;

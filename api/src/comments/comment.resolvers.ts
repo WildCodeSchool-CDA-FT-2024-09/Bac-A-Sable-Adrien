@@ -33,4 +33,20 @@ export default class CommentResolver {
       throw new Error("Failed to create comment");
     }
   }
+
+  @Mutation(() => Boolean)
+  async deletComment(@Arg("id") id: number): Promise<boolean> {
+    try {
+      const comment = await Comment.findOneOrFail({
+        where: { id },
+      });
+
+      await Comment.remove(comment);
+      console.log(`le Commentaire avec l'id ${id} a bien étais suprimer`);
+      return true;
+    } catch (error) {
+      console.error(`Erreur pour suprimer le commentaire ${id}`, error);
+      return false;
+    }
+  }
 }

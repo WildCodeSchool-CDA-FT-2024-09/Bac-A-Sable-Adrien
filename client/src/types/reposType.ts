@@ -4,6 +4,9 @@ export type Repo = {
   id: string;
   name: string;
   url: string;
-  status: string;
+  status: {
+    label: string;
+    id: number;
+  };
   langs: Langs[];
 };
