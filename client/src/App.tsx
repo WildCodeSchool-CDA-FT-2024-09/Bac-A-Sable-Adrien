@@ -12,7 +12,6 @@ function App() {
 
   if (loading) return <h1>Loading ...</h1>;
   if (error) return <p>Error</p>;
-  console.log(data);
 
   const filteredRepos = selectedLang
     ? data.fullrepos.filter((repo: Repo) =>
@@ -23,7 +22,7 @@ function App() {
   return (
     <>
       <main>
-        <div className="Title">Mes Repo Github</div>
+        <div className="Title">Mes Repo Github teste</div>
 
         <div className="NavMap">
           {data.fulllangs.map((langs: Langs) => (
