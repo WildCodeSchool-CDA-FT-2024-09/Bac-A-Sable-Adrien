@@ -19,38 +19,67 @@ import comments from "./comment.json";
 
   try {
     await queryRunner.startTransaction();
-    await queryRunner.query("DELETE FROM repo_langs_lang");
-    await queryRunner.query("DELETE FROM lang");
-    await queryRunner.query("DELETE FROM comment");
-    await queryRunner.query("DELETE FROM repo");
-    await queryRunner.query("DELETE FROM statu");
 
-    await queryRunner.query(
-      'DELETE FROM sqlite_sequence WHERE name="statu" OR name="lang" OR name="comment"'
-    );
+    // Vider les tables et réinitialiser les séquences
+    try {
+      await queryRunner.query("TRUNCATE lang CASCADE RESTART IDENTITY");
+      console.log("Truncated lang table successfully.");
+    } catch (error) {
+      console.error("Error truncating lang:", error);
+    }
 
+    try {
+      await queryRunner.query("TRUNCATE statu CASCADE RESTART IDENTITY");
+      console.log("Truncated statu table successfully.");
+    } catch (error) {
+      console.error("Error truncating statu:", error);
+    }
+
+    try {
+      await queryRunner.query("TRUNCATE repo CASCADE RESTART IDENTITY");
+      console.log("Truncated repo table successfully.");
+    } catch (error) {
+      console.error("Error truncating repo:", error);
+    }
+
+    try {
+      await queryRunner.query(
+        "TRUNCATE repo_langs_lang CASCADE RESTART IDENTITY"
+      );
+      console.log("Truncated repo_langs_lang table successfully.");
+    } catch (error) {
+      console.error("Error truncating repo_langs_lang:", error);
+    }
+
+    try {
+      await queryRunner.query("TRUNCATE comment CASCADE RESTART IDENTITY");
+      console.log("Truncated comment table successfully.");
+    } catch (error) {
+      console.error("Error truncating comment:", error);
+    }
+
+    console.log("Truncate DONE");
+    await queryRunner.commitTransaction();
+
+    // Réinsérer les données ici
     const savedlangs = await Promise.all(
       langs.map(async (el) => {
         const lang = new Lang();
         lang.label = el.label;
-
         return await lang.save();
       })
     );
 
-    console.log(savedlangs);
+    console.log("Langs saved:", savedlangs);
 
     const savedStatus = await Promise.all(
       status.map(async (el) => {
-        const status = new Statu();
-        status.label = el.label;
-
-        return await status.save();
+        const statu = new Statu();
+        statu.label = el.label;
+        return await statu.save();
       })
     );
-    //console.log(savedStatus);
-
-    //console.log(savedComments);
+    console.log("Status saved:", savedStatus);
 
     const savedRepos = await Promise.all(
       repos.map(async (el) => {
@@ -65,11 +94,9 @@ import comments from "./comment.json";
         repo.status = status;
 
         const mylangs = savedlangs.filter((svLg) => {
-          // console.log("repoID", el.id);
           const associatedlang = lang_by_repo.filter(
             (lgbyrep) => lgbyrep.repo_id === el.id
           );
-          // console.log("A", associatedlang);
           const langLabel = langs.filter((lg) =>
             associatedlang.some((assolg) => assolg.lang_id === lg.id)
           );
@@ -80,21 +107,24 @@ import comments from "./comment.json";
         return await repo.save();
       })
     );
+
     await Promise.all(
       comments.map(async (el) => {
-        const comments = new Comment();
-        comments.comment = el.comment;
-        comments.repos_id = el.repos_id;
-
-        return await comments.save();
+        const comment = new Comment();
+        comment.comment = el.comment;
+        comment.repos_id = el.repos_id;
+        return await comment.save();
       })
     );
 
-    console.log(savedRepos);
+    console.log("Repos saved:", savedRepos);
+    console.info("Seeder is DONE");
 
-    await queryRunner.commitTransaction();
+    await dataSource.destroy();
+    return;
   } catch (error) {
-    console.log(error);
+    console.error("Error during seeding:", error);
     await queryRunner.rollbackTransaction();
+    await dataSource.destroy();
   }
 })();

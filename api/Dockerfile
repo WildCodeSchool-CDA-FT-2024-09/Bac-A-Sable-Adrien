@@ -18,4 +18,4 @@ COPY data data
 EXPOSE 4000
 
 # Lancer l'application avec nodemon
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "full"]
